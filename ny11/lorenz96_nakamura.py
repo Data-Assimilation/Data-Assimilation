@@ -4,11 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 J = 40
-h = 0.05 #calculate unit
-N = 40 # number of times
-F = 4.0
+h = 0.1 #calculate unit
+N = 400 # number of times
+F = 8.0
 X = [F]*J # Xjたちの初期値
-X[19] = F + 0.008
+X[19] = F * 1.001
 
 #print X
 
@@ -83,7 +83,7 @@ k=1
 
 while k < 6:
 	plt.subplot(5,1,k)
-	plt.plot(Xplot[0+8*(k-1)])
-	plt.yticks(np.arange(F-0.2, F+0.2, 0.08))
+	plt.plot(Xplot[0+N/5*(k-1)])
+	plt.yticks(np.arange(F-F/4, F+F/4, 1))
 	k=k+1
 else:plt.show()
