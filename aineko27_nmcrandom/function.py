@@ -102,7 +102,7 @@ def calcLyapunov2(f, x, F, dt):
     print(sum, np.log(2)/sum)
 
 #カルマンフィルターの計算
-def KF(x_a, x_f, y, dt, P_a, H, R):
+def KF(x_a, x_f, y, dt, P_a, H, R, mul=0.08):
     #ヤコビアンの求め方その２
     J = len(x_a)
     M2 = np.zeros([J, J])
@@ -113,7 +113,7 @@ def KF(x_a, x_f, y, dt, P_a, H, R):
     P_f = M2.dot(P_a).dot(M2.T)
     K = P_f.dot(H.T).dot(np.linalg.inv(R + H.dot(P_f).dot(H.T)))
     P_a = (np.eye(J)- K.dot(H)).dot(P_f)
-    P_a = 1.08* P_a
+    P_a = (1+mul)* P_a
     x = x_f + K.dot(y- H.dot(x_f))
     return x, P_a
 
@@ -123,8 +123,31 @@ def calc3DVAR(x_f, y, H, B, R):
     #x = x_f + (y- H.dot(x_f)).dot(np.linalg.inv(np.linalg.inv(B)+ H.T.dot(np.linalg.inv(R).dot(H))).dot(H.T).dot(np.linalg.inv(R)))
     return x
 
-
-
-
-
+#アンサンブルカルマンフィルターの計算。こっちはうまくいかなかったので無視していい
+def EnKF(X_f, y, m, R, H):
+    inf = 0.1
+    y = y.reshape(len(y), 1)
+    dX = X_f- X_f.mean(axis=1, keepdims=True)
+    dY = H.dot(dX)
+    K = inf*(dX.dot(dY.T)).dot(np.linalg.inv(inf*(dY.dot(dY.T))+ (m-1)*R))
+    X_a = X_f + K.dot((y+ np.random.normal(0, 1, [m, len(X_f)])- H.dot(X_f)))
+    return X_a
+    
+#アンサンブルカルマンフィルターの計算その２
+def LETKF(X_f, y, m, R, H, inf):
+    #yを一応縦の行列にしとく。dX,dYを計算してTT^Tをもとめる。求めたTT^Tを固有値分解してTの値を求める。
+    y = y.reshape(len(y), 1)
+    dX = X_f- X_f.mean(axis=1, keepdims=True)
+    dY = H.dot(dX)
+    D, U = np.linalg.eig((m-1)*np.eye(m)/inf + dY.T.dot(np.linalg.inv(R)).dot(dY))
+    D = 1/D
+    #求めたTの値からX_aの値を求める。ここまでpdfのDerivation of LETKFを参考にした
+    X_a = X_f.mean(axis=1, keepdims=True) + dX.dot(U.dot(np.diag(D)).dot(U.T).dot(dY.T).dot(np.linalg.inv(R)).dot(y-H.dot(X_f.mean(axis=1, keepdims=True)))+np.sqrt(m-1)*U.dot(np.diag(np.sqrt(D))).dot(U.T))
+    return X_a
+    
+    
+    
+    
+    
+    
 

@@ -27,10 +27,13 @@ Fig1 = []
 Fig2 = []
 Fig3 = []
 
-rem = []
-for k in range(0,J):
+rem = [] #rem_listからここに1つずつ追加していく
+rem_list = [0,1,2, 6,7,8, 11,12,13, 16,17,18, 21,22,23, 25,26,27] #抜け落ちを決める
+rem_list.insert(0, 100) #100は1つも抜かない時のため
+for k in rem_list:
     #抜け落ちさせる観測点を設定する
-    rem.append(k) #rem = [2]だったら1、、、40の内の2+1=3箇所目の観測が抜け落ちるという意味
+    if k != 100: #100は1つも抜かないときを表す
+        rem.append(k) #rem = [2]だったら1、、、40の内の2+1=3箇所目の観測が抜け落ちるという意味
     l_rem = len(rem)
     #抜け落ちさせた観測点に対応した観測演算子Hをつくる
     H = np.eye(J-l_rem)
@@ -51,13 +54,16 @@ for k in range(0,J):
     ERROR = np.array(ERROR)
     Fig1.append(ERROR.mean())
 Fig1 = np.array(Fig1)
-plt.plot(Fig1)
+plt.xlim(np.min(range(0,len(rem_list))), np.max(range(0,len(rem_list))))
+plt.xticks(range(0,len(rem_list)), range(0,len(rem_list)))
+plt.plot(range(0,len(rem_list)), Fig1)
 plt.show()
 
 rem = []
-for k in range(0,J):
+for k in rem_list:
     #抜け落ちさせる観測点を設定する
-    rem.append(k) #rem = [2]だったら1、、、40の内の2+1=3箇所目の観測が抜け落ちるという意味
+    if k != 100: #100は1つも抜かないときを表す
+        rem.append(k) #rem = [2]だったら1、、、40の内の2+1=3箇所目の観測が抜け落ちるという意味
     l_rem = len(rem)
     #抜け落ちさせた観測点に対応した観測演算子Hをつくる
     H = np.eye(J-l_rem)
@@ -80,14 +86,18 @@ for k in range(0,J):
     ERROR = np.array(ERROR)
     Fig2.append(ERROR.mean())
 Fig2 = np.array(Fig2)
-plt.plot(Fig2)
+plt.xlim(np.min(range(0,len(rem_list))), np.max(range(0,len(rem_list))))
+plt.xticks(range(0,len(rem_list)), range(0,len(rem_list)))
+plt.plot(range(0,len(rem_list)), Fig2)
 plt.show()
 
-plt.plot(Fig1)
-plt.plot(Fig2)
+plt.xlim(np.min(range(0,len(rem_list))), np.max(range(0,len(rem_list))))
+plt.xticks(range(0,len(rem_list)), range(0,len(rem_list)))
+plt.plot(range(0,len(rem_list)), Fig1, label="KF")
+plt.plot(range(0,len(rem_list)), Fig2, label="3DVAR")
+plt.legend(loc="best")
 plt.title("removing observation points")
 plt.xlabel("The number of removed observation Points")
 plt.ylabel("RMSE")
 plt.savefig("Fig7_3.png",format = 'png', dpi=300)
 plt.show()
-
